@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>rectifierr-frontend</Name>
+  <Repository>ghcr.io/benwisecup/rectifierr-frontend:latest</Repository>
+  <Registry>https://ghcr.io</Registry>
+  <Network>bridge</Network>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Overview>Rectifierr frontend — web UI for the Rectifierr media quality auditor.</Overview>
+  <Category>MediaApp:Video</Category>
+  <WebUI>http://[IP]:[PORT:7878]/</WebUI>
+  <ExtraParams/>
+  <PostArgs/>
+  <CPUset/>
+
+  <Data/>
+
+  <Networking>
+    <Mode>bridge</Mode>
+    <Publish>
+      <Port>
+        <HostPort>7878</HostPort>
+        <ContainerPort>80</ContainerPort>
+        <Protocol>tcp</Protocol>
+      </Port>
+    </Publish>
+  </Networking>
+
+  <Environment>
+    <Variable>
+      <Name>BACKEND_URL</Name>
+      <!-- Set this to http://YOUR_UNRAID_IP:8000 -->
+      <Value>http://192.168.1.x:8000</Value>
+      <Mode/>
+    </Variable>
+  </Environment>
+
+  <Labels/>
+</Container>
