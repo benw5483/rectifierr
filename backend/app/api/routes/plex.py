@@ -10,7 +10,10 @@ Auth flow (frontend drives this):
   GET  /sync/status          → live progress
   GET  /status               → full connection state (called on page load)
   DELETE /disconnect         → clear token + server + account info
+  GET  /path-check           → diagnostic: sample stored paths vs disk
 """
+import os
+
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -229,6 +232,64 @@ def set_path_prefix(body: PathPrefixRequest, db: Session = Depends(get_db)):
     _set(db, "plex_path_prefix", body.plex_prefix, "Plex file path prefix")
     _set(db, "local_path_prefix", body.local_prefix, "Local file path prefix")
     return {"saved": True}
+
+
+@router.get("/path-check")
+def path_check(db: Session = Depends(get_db)):
+    """
+    Diagnostic: sample up to 5 stored media paths, check if they exist on
+    disk, and attempt to auto-detect the correct prefix mapping when they
+    don't.  Useful for diagnosing Plex ↔ container path mismatches.
+    """
+    from app.core.config import settings as cfg
+    from app.models.media import MediaFile
+
+    plex_prefix = _get(db, "plex_path_prefix")
+    local_prefix = _get(db, "local_path_prefix")
+
+    sample_rows = db.query(MediaFile.path).limit(5).all()
+    samples = [{"path": row[0], "exists": os.path.isfile(row[0])} for row in sample_rows]
+
+    suggestion = None
+    media_root = cfg.MEDIA_ROOT
+    media_root_exists = os.path.isdir(media_root)
+
+    # Only attempt auto-detection when no files are found and MEDIA_ROOT is accessible.
+    all_missing = bool(samples) and not any(s["exists"] for s in samples)
+    if all_missing and media_root_exists:
+        for s in samples:
+            target_name = os.path.basename(s["path"])
+            for root, dirs, files in os.walk(media_root):
+                dirs[:] = sorted(d for d in dirs if not d.startswith("."))
+                if target_name in files:
+                    found = os.path.join(root, target_name)
+                    stored_parts = s["path"].split("/")
+                    found_parts = found.split("/")
+                    n = min(len(stored_parts), len(found_parts))
+                    common = 0
+                    for i in range(1, n + 1):
+                        if stored_parts[-i] == found_parts[-i]:
+                            common = i
+                        else:
+                            break
+                    if common > 0:
+                        suggestion = {
+                            "plex_prefix": "/".join(stored_parts[:-common]) + "/",
+                            "local_prefix": "/".join(found_parts[:-common]) + "/",
+                            "matched_stored": s["path"],
+                            "matched_found": found,
+                        }
+                    break
+            if suggestion:
+                break
+
+    return {
+        "current": {"plex_prefix": plex_prefix, "local_prefix": local_prefix},
+        "samples": samples,
+        "suggestion": suggestion,
+        "media_root": media_root,
+        "media_root_exists": media_root_exists,
+    }
 
 
 # ---------------------------------------------------------------------------

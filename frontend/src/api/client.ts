@@ -130,6 +130,7 @@ export const api = {
       body: JSON.stringify({ keys }),
     }),
   plexDisconnect: () => request<{ disconnected: boolean }>("/plex/disconnect", { method: "DELETE" }),
+  plexPathCheck: () => request<PathCheckResult>("/plex/path-check"),
 };
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -282,4 +283,17 @@ export interface PlexLibrary {
   title: string;
   type: "movie" | "show" | "artist" | "photo" | string;
   selected: boolean;
+}
+
+export interface PathCheckResult {
+  current: { plex_prefix: string; local_prefix: string };
+  samples: Array<{ path: string; exists: boolean }>;
+  suggestion?: {
+    plex_prefix: string;
+    local_prefix: string;
+    matched_stored: string;
+    matched_found: string;
+  };
+  media_root: string;
+  media_root_exists: boolean;
 }
