@@ -1,0 +1,47 @@
+version: "3.9"
+
+# Production compose — uses pre-built images from ghcr.io.
+# Copy this file to your Unraid server and edit MEDIA_ROOT before running.
+#
+# Usage:
+#   docker compose -f docker-compose.prod.yml up -d
+
+services:
+  backend:
+    image: ghcr.io/benwisecup/rectifierr-backend:latest
+    container_name: rectifierr-backend
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=sqlite:////config/rectifierr.db
+      - CONFIG_DIR=/config
+      - THUMBNAILS_DIR=/config/thumbnails
+      # Set MEDIA_ROOT to the path inside the container that maps to your media.
+      # This should match the ContainerDir of your media volume below.
+      - MEDIA_ROOT=/media
+      - DEBUG=false
+      # Optional — configure Plex connection via the UI instead
+      # - PLEX_URL=http://your-plex-ip:32400
+      # - PLEX_TOKEN=your-plex-token
+    volumes:
+      # Config + database (persistent)
+      - /mnt/user/appdata/rectifierr:/config
+      # Your media — set the HostDir to wherever your Plex media lives on Unraid.
+      # Use :ro (read-only) unless you need trim/edit features.
+      - /mnt/user/data:/media:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    image: ghcr.io/benwisecup/rectifierr-frontend:latest
+    container_name: rectifierr-frontend
+    restart: unless-stopped
+    ports:
+      - "7878:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes: {}

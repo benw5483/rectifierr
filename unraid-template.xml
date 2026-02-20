@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>rectifierr</Name>
+  <Repository>ghcr.io/yourusername/rectifierr:latest</Repository>
+  <Registry>https://ghcr.io</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>bash</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/yourusername/rectifierr</Support>
+  <Project>https://github.com/yourusername/rectifierr</Project>
+  <Overview>
+    Rectifierr — Media quality auditor for Plex.
+    Detects network bumpers (Fox/NBC/CBS promos), DVR commercials, and
+    persistent channel logos/watermarks in your media library.
+    Scan, review, and optionally remove offending segments.
+  </Overview>
+  <Category>MediaApp:Video</Category>
+  <WebUI>http://[IP]:[PORT:7878]/</WebUI>
+  <TemplateURL/>
+  <Icon>https://raw.githubusercontent.com/yourusername/rectifierr/main/assets/icon.png</Icon>
+  <ExtraParams/>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled/>
+  <DonateText/>
+  <DonateLink/>
+  <Description>
+    Rectifierr scans your Plex media library for quality issues including network bumpers,
+    DVR commercials, and embedded channel logos. Supports automated scheduled scanning
+    and one-click segment removal.
+  </Description>
+  <Networking>
+    <Mode>bridge</Mode>
+    <Publish>
+      <Port>
+        <HostPort>7878</HostPort>
+        <ContainerPort>80</ContainerPort>
+        <Protocol>tcp</Protocol>
+      </Port>
+      <Port>
+        <HostPort>8000</HostPort>
+        <ContainerPort>8000</ContainerPort>
+        <Protocol>tcp</Protocol>
+      </Port>
+    </Publish>
+  </Networking>
+  <Data>
+    <Volume>
+      <HostDir>/mnt/user/appdata/rectifierr</HostDir>
+      <ContainerDir>/config</ContainerDir>
+      <Mode>rw</Mode>
+    </Volume>
+    <Volume>
+      <HostDir>/mnt/user/</HostDir>
+      <ContainerDir>/media</ContainerDir>
+      <Mode>ro</Mode>
+    </Volume>
+  </Data>
+  <Environment>
+    <Variable>
+      <Value/>
+      <Name>PLEX_URL</Name>
+      <Mode/>
+    </Variable>
+    <Variable>
+      <Value/>
+      <Name>PLEX_TOKEN</Name>
+      <Mode/>
+    </Variable>
+    <Variable>
+      <Value>180</Value>
+      <Name>BUMPER_SCAN_SECONDS</Name>
+      <Mode/>
+    </Variable>
+    <Variable>
+      <Value>0.35</Value>
+      <Name>SCENE_CHANGE_THRESHOLD</Name>
+      <Mode/>
+    </Variable>
+    <Variable>
+      <Value>true</Value>
+      <Name>LOGO_DETECTION_ENABLED</Name>
+      <Mode/>
+    </Variable>
+    <Variable>
+      <Value>0.5</Value>
+      <Name>MIN_CONFIDENCE</Name>
+      <Mode/>
+    </Variable>
+  </Environment>
+  <Labels/>
+</Container>

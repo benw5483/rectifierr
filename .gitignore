@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+.env
+
+# Node
+node_modules/
+frontend/dist/
+frontend/.vite/
+
+# DB / runtime
+*.db
+*.db-shm
+*.db-wal
+/config/
+
+# Media backups
+*.bak
+
+# OS
+.DS_Store
+Thumbs.db
