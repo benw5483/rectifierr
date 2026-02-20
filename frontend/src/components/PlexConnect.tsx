@@ -10,7 +10,7 @@
  *   connecting     Saving chosen server (quick connectivity check).
  *   connected      Token + server stored. Shows account info + sync controls.
  */
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   BookOpen, CheckCircle2, ChevronRight, ExternalLink, Loader2,
@@ -21,18 +21,6 @@ import { api, PlexServer, PlexStatus } from "../api/client";
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
-function plural(n: number, word: string) {
-  return `${n.toLocaleString()} ${word}${n !== 1 ? "s" : ""}`;
-}
-
-function timeAgo(iso?: string): string {
-  if (!iso) return "never";
-  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
-  if (diff < 60) return "just now";
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
-}
 
 // ── Sub-views ─────────────────────────────────────────────────────────────────
 
@@ -430,7 +418,6 @@ export default function PlexConnect({ onConnected }: { onConnected?: () => void 
   });
 
   const [phase, setPhase] = useState<Phase>("loading");
-  const [pinId, setPinId] = useState<number | null>(null);
   const [pinCode, setPinCode] = useState("");
   const [authUrl, setAuthUrl] = useState("");
   const [servers, setServers] = useState<PlexServer[]>([]);
@@ -486,7 +473,6 @@ export default function PlexConnect({ onConnected }: { onConnected?: () => void 
     mutationFn: api.plexAuthStart,
     onMutate: () => { setPhase("starting"); setError(null); },
     onSuccess: (data) => {
-      setPinId(data.pin_id);
       setPinCode(data.pin_code);
       setAuthUrl(data.auth_url);
       setPhase("awaiting_auth");
@@ -536,7 +522,6 @@ export default function PlexConnect({ onConnected }: { onConnected?: () => void 
   const cancel = () => {
     stopPolling();
     setPhase("idle");
-    setPinId(null);
     setPinCode("");
     setError(null);
   };

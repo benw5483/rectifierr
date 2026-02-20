@@ -1,8 +1,8 @@
-import React from "react";
+import { type ElementType } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   FileVideo, AlertTriangle, CheckCircle, Tv, ScanLine,
-  AlertCircle, Loader2, Play, RefreshCw,
+  AlertCircle, Loader2, Play,
 } from "lucide-react";
 import { api, RecentIssue } from "../api/client";
 import StatusBadge from "../components/StatusBadge";
@@ -11,7 +11,7 @@ function StatCard({ label, value, sub, icon: Icon, color }: {
   label: string;
   value: number | string;
   sub?: string;
-  icon: React.ElementType;
+  icon: ElementType;
   color: string;
 }) {
   return (
@@ -28,15 +28,6 @@ function StatCard({ label, value, sub, icon: Icon, color }: {
   );
 }
 
-function formatSeconds(s?: number): string {
-  if (!s) return "—";
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  const sec = Math.floor(s % 60);
-  if (h > 0) return `${h}h ${m}m`;
-  if (m > 0) return `${m}m ${sec}s`;
-  return `${sec}s`;
-}
 
 export default function Dashboard() {
   const qc = useQueryClient();

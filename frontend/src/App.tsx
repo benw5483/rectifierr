@@ -1,6 +1,6 @@
-import React from "react";
-import { BrowserRouter, Navigate, Routes, Route, useNavigate } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { type ReactNode } from "react";
+import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { Loader2, Zap } from "lucide-react";
 import { api } from "./api/client";
 import Layout from "./components/Layout";
@@ -17,7 +17,7 @@ import Setup from "./pages/Setup";
 // • Connected     → render the full app
 // • Backend down  → show an error screen
 
-function RequirePlex({ children }: { children: React.ReactNode }) {
+function RequirePlex({ children }: { children: ReactNode }) {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["plex-status"],
     queryFn: api.plexStatus,

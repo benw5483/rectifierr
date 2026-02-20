@@ -1,4 +1,3 @@
-import React from "react";
 import { NavLink } from "react-router-dom";
 import { LayoutDashboard, Library, Activity, Settings, Zap } from "lucide-react";
 import clsx from "clsx";
