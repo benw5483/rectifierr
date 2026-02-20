@@ -138,6 +138,23 @@ def list_series(
     ]
 
 
+@router.post("/purge-missing")
+def purge_missing(db: Session = Depends(get_db)):
+    """
+    Delete every MediaFile record whose path does not exist on disk.
+    Useful after correcting a path prefix to remove stale/duplicate entries
+    that accumulated from the old (wrong) paths.
+    """
+    all_records = db.query(MediaFile).all()
+    removed = 0
+    for m in all_records:
+        if not os.path.isfile(m.path):
+            db.delete(m)
+            removed += 1
+    db.commit()
+    return {"removed": removed}
+
+
 @router.get("/{media_id}")
 def get_media(media_id: int, db: Session = Depends(get_db)):
     m = db.query(MediaFile).filter(MediaFile.id == media_id).first()

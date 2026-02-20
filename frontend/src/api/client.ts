@@ -63,6 +63,7 @@ export const api = {
   getMedia: (id: number) => request<MediaFile>(`/media/${id}`),
   scanMedia: (id: number) => request<{ job_id: number }>(`/media/${id}/scan`, { method: "POST" }),
   deleteMedia: (id: number) => request<void>(`/media/${id}`, { method: "DELETE" }),
+  purgeMissingMedia: () => request<{ removed: number }>("/media/purge-missing", { method: "POST" }),
   getIssues: (mediaId: number) => request<Issue[]>(`/media/${mediaId}/issues`),
   resolveIssue: (mediaId: number, issueId: number, method: string) =>
     request<void>(`/media/${mediaId}/issues/${issueId}/resolve`, {

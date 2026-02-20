@@ -49,6 +49,7 @@ function SettingRow({
 
 function PathDiagnostics() {
   const qc = useQueryClient();
+  const [purgeConfirm, setPurgeConfirm] = useState(false);
 
   const { data, refetch, isFetching } = useQuery({
     queryKey: ["path-check"],
@@ -66,8 +67,20 @@ function PathDiagnostics() {
     },
   });
 
+  const purgeMut = useMutation({
+    mutationFn: api.purgeMissingMedia,
+    onSuccess: () => {
+      setPurgeConfirm(false);
+      qc.invalidateQueries({ queryKey: ["media-list"] });
+      qc.invalidateQueries({ queryKey: ["stats"] });
+      qc.invalidateQueries({ queryKey: ["path-check"] });
+      refetch();
+    },
+  });
+
   const allOk = data?.samples.length && data.samples.every((s) => s.exists);
   const allMissing = data?.samples.length && data.samples.every((s) => !s.exists);
+  const someMissing = data?.samples.length && data.samples.some((s) => !s.exists);
 
   return (
     <div className="card">
@@ -183,6 +196,45 @@ function PathDiagnostics() {
                 Files not found and could not auto-detect mapping. Check that your media volume is
                 mounted correctly and update the Plex / Local prefix in Settings → Library manually.
               </p>
+            </div>
+          )}
+
+          {/* Purge unreachable */}
+          {someMissing && (
+            <div className="border-t border-slate-800 pt-3">
+              {!purgeConfirm ? (
+                <button
+                  onClick={() => setPurgeConfirm(true)}
+                  className="btn-secondary text-xs py-1 text-red-400 border-red-900 hover:bg-red-950/40"
+                >
+                  Remove unreachable files from library
+                </button>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <p className="text-xs text-red-300">
+                    This will delete all library records whose path doesn't exist on disk. Continue?
+                  </p>
+                  <button
+                    onClick={() => purgeMut.mutate()}
+                    disabled={purgeMut.isPending}
+                    className="btn-primary text-xs py-1 bg-red-700 hover:bg-red-600 shrink-0"
+                  >
+                    {purgeMut.isPending ? <Loader2 size={12} className="animate-spin" /> : null}
+                    Confirm
+                  </button>
+                  <button
+                    onClick={() => setPurgeConfirm(false)}
+                    className="btn-secondary text-xs py-1 shrink-0"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+              {purgeMut.isSuccess && (
+                <p className="text-xs text-green-400 mt-1.5">
+                  Removed {purgeMut.data.removed} unreachable record{purgeMut.data.removed !== 1 ? "s" : ""}.
+                </p>
+              )}
             </div>
           )}
         </div>
